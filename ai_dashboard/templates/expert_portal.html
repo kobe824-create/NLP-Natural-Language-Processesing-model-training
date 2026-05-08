@@ -4,22 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sentiment Analytics Dashboard</title>
+    <meta name="description" content="AI-powered sentiment analysis dashboard with confidence scoring and Kinyarwanda translation.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #fafbfc;
+            --bg-color: #f6f8fa;
             --surface-color: #ffffff;
-            --border-color: #e1e4e8;
-            --text-main: #24292e;
-            --text-muted: #586069;
-            --accent-primary: #0366d6;
-            --accent-hover: #005cc5;
-            --positive: #28a745;
-            --negative: #d73a49;
-            --neutral: #6a737d;
-            --shadow-sm: 0 1px 3px rgba(27,31,35,0.12), 0 1px 2px rgba(27,31,35,0.08);
-            --shadow-md: 0 4px 6px rgba(27,31,35,0.08), 0 1px 3px rgba(27,31,35,0.04);
+            --border-color: #d8dee4;
+            --text-main: #1f2328;
+            --text-muted: #656d76;
+            --accent-primary: #0969da;
+            --accent-hover: #0550ae;
+            --positive: #1a7f37;
+            --positive-bg: #dafbe1;
+            --negative: #cf222e;
+            --negative-bg: #ffebe9;
+            --neutral: #6e7781;
+            --neutral-bg: #eaeef2;
+            --translation-accent: #8250df;
+            --translation-bg: #fbefff;
+            --shadow-sm: 0 1px 3px rgba(31,35,40,0.04), 0 1px 2px rgba(31,35,40,0.06);
+            --shadow-md: 0 3px 6px rgba(31,35,40,0.04), 0 3px 6px rgba(31,35,40,0.05);
+            --shadow-lg: 0 8px 24px rgba(31,35,40,0.06);
         }
 
         * {
@@ -37,7 +44,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Topbar */
+        /* ── Topbar ── */
         .topbar {
             height: 64px;
             background: var(--surface-color);
@@ -46,32 +53,32 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 32px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: var(--shadow-sm);
         }
-        
+
         .logo {
-            font-weight: 600;
+            font-weight: 700;
             font-size: 16px;
             display: flex;
             align-items: center;
             gap: 12px;
             color: var(--text-main);
         }
-        
+
         .logo .icon {
-            width: 24px;
-            height: 24px;
-            background-color: var(--accent-primary);
-            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent-primary), #8250df);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: 700;
-            font-size: 12px;
+            font-weight: 800;
+            font-size: 13px;
         }
 
         .user-nav {
@@ -81,72 +88,90 @@
             display: flex;
             gap: 20px;
         }
-        
+
         .user-nav a {
             color: var(--text-muted);
             text-decoration: none;
             transition: color 0.2s;
         }
-        
-        .user-nav a:hover {
-            color: var(--text-main);
+
+        .user-nav a:hover { color: var(--text-main); }
+
+        /* ── Layout ── */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 32px;
         }
 
-        /* Layout */
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 32px;
+        .grid-main {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 32px;
+            gap: 24px;
         }
 
-        /* Panels */
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* ── Panels ── */
         .panel {
             background: var(--surface-color);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: var(--shadow-sm);
             overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+
+        .panel:hover {
+            box-shadow: var(--shadow-md);
         }
 
         .panel-header {
             padding: 16px 24px;
             border-bottom: 1px solid var(--border-color);
-            background: #fdfdfd;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-header .header-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.6;
         }
 
         .panel-body {
             padding: 24px;
         }
 
-        /* Form Area */
-        .form-group {
-            margin-bottom: 20px;
-        }
+        /* ── Form ── */
+        .form-group { margin-bottom: 20px; }
 
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
-            font-size: 14px;
-            color: var(--text-main);
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
         }
 
         textarea {
             width: 100%;
             height: 200px;
-            padding: 12px 16px;
+            padding: 14px 16px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background: #fefefe;
+            border-radius: 8px;
+            background: var(--bg-color);
             color: var(--text-main);
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.7;
             resize: vertical;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
@@ -154,97 +179,303 @@
         textarea:focus {
             outline: none;
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.15);
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15);
+            background: var(--surface-color);
         }
 
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             background: var(--accent-primary);
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 500;
+            border-radius: 8px;
+            font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            text-align: center;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
         }
 
         .btn:hover {
             background: var(--accent-hover);
-        }
-        
-        .btn:active {
-            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(9, 105, 218, 0.25);
         }
 
-        /* Results Area */
-        .result-summary {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 32px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--border-color);
+        .btn:active { transform: scale(0.97); }
+
+        .btn svg { width: 16px; height: 16px; }
+
+        /* ── Result Summary Cards ── */
+        .result-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 28px;
         }
 
-        .stat-box {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .result-card {
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.15s, box-shadow 0.15s;
         }
 
-        .stat-label {
-            font-size: 12px;
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .result-card .rc-label {
+            font-size: 11px;
             text-transform: uppercase;
             font-weight: 600;
+            letter-spacing: 0.6px;
             color: var(--text-muted);
-            letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
 
-        .stat-value {
-            font-size: 28px;
+        .result-card .rc-value {
+            font-size: 26px;
             font-weight: 700;
+            line-height: 1;
         }
-        
-        .val-positive { color: var(--positive); }
-        .val-negative { color: var(--negative); }
-        .val-neutral { color: var(--neutral); }
 
-        /* Chart */
+        .result-card .rc-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .rc-positive { background: var(--positive-bg); border-color: #a7f3d0; }
+        .rc-positive .rc-value { color: var(--positive); }
+
+        .rc-negative { background: var(--negative-bg); border-color: #fecaca; }
+        .rc-negative .rc-value { color: var(--negative); }
+
+        .rc-neutral { background: var(--neutral-bg); border-color: #d0d7de; }
+        .rc-neutral .rc-value { color: var(--neutral); }
+
+        /* ── Confidence Breakdown ── */
+        .confidence-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .conf-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .conf-label {
+            font-size: 13px;
+            font-weight: 600;
+            width: 80px;
+            flex-shrink: 0;
+        }
+
+        .conf-bar-track {
+            flex: 1;
+            height: 10px;
+            background: var(--bg-color);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .conf-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .conf-bar-fill.positive { background: linear-gradient(90deg, #2da44e, #1a7f37); }
+        .conf-bar-fill.negative { background: linear-gradient(90deg, #fa4549, #cf222e); }
+        .conf-bar-fill.neutral  { background: linear-gradient(90deg, #8c959f, #6e7781); }
+
+        .conf-pct {
+            font-size: 13px;
+            font-weight: 700;
+            width: 52px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* ── Translation Panel ── */
+        .translation-panel {
+            border-left: 4px solid var(--translation-accent);
+        }
+
+        .translation-panel .panel-header {
+            color: var(--translation-accent);
+        }
+
+        .translation-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-main);
+            padding: 16px 20px;
+            background: var(--translation-bg);
+            border-radius: 8px;
+            border: 1px solid #e9d5f5;
+            font-style: italic;
+        }
+
+        .translation-lang-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--translation-accent);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+
+        /* ── Sentence Detail Table ── */
+        .detail-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+        }
+
+        .detail-table thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            background: var(--bg-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .detail-table tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eaeef2;
+            vertical-align: top;
+        }
+
+        .detail-table tbody tr {
+            transition: background 0.15s;
+        }
+
+        .detail-table tbody tr:hover {
+            background: #f6f8fa;
+        }
+
+        .detail-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-positive { background: var(--positive-bg); color: var(--positive); }
+        .badge-negative { background: var(--negative-bg); color: var(--negative); }
+        .badge-neutral  { background: var(--neutral-bg);  color: var(--neutral); }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .badge-positive .badge-dot { background: var(--positive); }
+        .badge-negative .badge-dot { background: var(--negative); }
+        .badge-neutral  .badge-dot { background: var(--neutral); }
+
+        .td-translation {
+            color: var(--translation-accent);
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        .td-conf {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Chart ── */
         .chart-container {
             position: relative;
-            height: 250px;
+            height: 260px;
             width: 100%;
-            margin-top: 24px;
         }
 
-        .chart-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-        
+        /* ── Empty State ── */
         .empty-state {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100%;
+            min-height: 220px;
             color: var(--text-muted);
             text-align: center;
-        }
-        
-        .empty-state svg {
-            margin-bottom: 16px;
-            opacity: 0.5;
+            padding: 40px;
         }
 
-        @media (max-width: 900px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
+        .empty-state svg {
+            margin-bottom: 16px;
+            opacity: 0.35;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            max-width: 300px;
+        }
+
+        /* ── Flash Messages ── */
+        .flash-error {
+            background: var(--negative-bg);
+            color: var(--negative);
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.4s ease-out both;
+        }
+
+        .animate-in:nth-child(2) { animation-delay: 0.06s; }
+        .animate-in:nth-child(3) { animation-delay: 0.12s; }
+        .animate-in:nth-child(4) { animation-delay: 0.18s; }
+        .animate-in:nth-child(5) { animation-delay: 0.24s; }
+
+        /* ── Responsive ── */
+        @media (max-width: 960px) {
+            .grid-main { grid-template-columns: 1fr; }
+            .result-cards { grid-template-columns: 1fr; }
+            .container { padding: 20px; }
         }
     </style>
 </head>
@@ -261,57 +492,187 @@
     </div>
 
     <div class="container">
-        <!-- Input Section -->
-        <div class="panel">
-            <div class="panel-header">Analyze Text</div>
-            <div class="panel-body">
-                <form action="{{ url_for('expert_portal') }}" method="POST">
-                    <div class="form-group">
-                        <label for="text_input">Source Text</label>
-                        <textarea id="text_input" name="text_input" placeholder="Paste a paragraph, review, or feedback here to analyze its sentiment trajectory..." required>{{ user_text if user_text else '' }}</textarea>
-                    </div>
-                    <button type="submit" class="btn">Analyze Sentiment</button>
-                </form>
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-error">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="grid-main">
+
+            <!-- ═══ INPUT PANEL ═══ -->
+            <div class="panel animate-in" id="input-panel">
+                <div class="panel-header">
+                    <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    Analyze Text
+                </div>
+                <div class="panel-body">
+                    <form action="{{ url_for('expert_portal') }}" method="POST" id="analyze-form">
+                        <div class="form-group">
+                            <label for="text_input">Source Text</label>
+                            <textarea id="text_input" name="text_input"
+                                placeholder="Paste a paragraph, review, or feedback here to analyze its sentiment and translate to Kinyarwanda..."
+                                required>{{ user_text if user_text else '' }}</textarea>
+                        </div>
+                        <button type="submit" class="btn" id="analyze-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            Analyze &amp; Translate
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <!-- Results Section -->
-        <div class="panel">
-            <div class="panel-header">Analysis Results</div>
-            <div class="panel-body">
-                {% if analyzed %}
-                    <div class="result-summary">
-                        <div class="stat-box">
-                            <span class="stat-label">Overall Sentiment</span>
-                            <span class="stat-value val-{{ prediction|lower }}">
-                                {{ prediction }}
-                            </span>
+            <!-- ═══ RESULTS PANEL ═══ -->
+            <div class="panel animate-in" id="results-panel">
+                <div class="panel-header">
+                    <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    Analysis Results
+                </div>
+                <div class="panel-body">
+                    {% if analyzed %}
+                        <div class="result-cards">
+                            <div class="result-card rc-{{ prediction|lower }}">
+                                <div class="rc-label">Overall Sentiment</div>
+                                <div class="rc-value">{{ prediction }}</div>
+                                <div class="rc-sub">Primary classification</div>
+                            </div>
+                            <div class="result-card" style="background: #f0f6fc; border-color: #b6d0e2;">
+                                <div class="rc-label">Confidence</div>
+                                <div class="rc-value" style="color: var(--accent-primary);">{{ "%.1f"|format(confidence * 100) }}%</div>
+                                <div class="rc-sub">Model certainty</div>
+                            </div>
+                            <div class="result-card" style="background: var(--translation-bg); border-color: #e9d5f5;">
+                                <div class="rc-label">Translation</div>
+                                <div class="rc-value" style="color: var(--translation-accent); font-size: 18px;">Kinyarwanda</div>
+                                <div class="rc-sub">🇷🇼 Target language</div>
+                            </div>
                         </div>
-                        <div class="stat-box" style="text-align: right;">
-                            <span class="stat-label">Confidence Score</span>
-                            <span class="stat-value" style="color: var(--text-main);">
-                                {{ "%.1f"|format(confidence * 100) }}%
-                            </span>
+
+                        <!-- Confidence Breakdown -->
+                        <div style="margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px;">Confidence Breakdown</div>
+                        <div class="confidence-bars" style="margin-bottom: 28px;">
+                            {% for cls_name, pct in confidence_breakdown.items() %}
+                            <div class="conf-row">
+                                <span class="conf-label" style="color:
+                                    {% if cls_name == 'Positive' %}var(--positive)
+                                    {% elif cls_name == 'Negative' %}var(--negative)
+                                    {% else %}var(--neutral){% endif %};">
+                                    {{ cls_name }}
+                                </span>
+                                <div class="conf-bar-track">
+                                    <div class="conf-bar-fill {{ cls_name|lower }}" style="width: {{ pct }}%;"></div>
+                                </div>
+                                <span class="conf-pct">{{ pct }}%</span>
+                            </div>
+                            {% endfor %}
                         </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                            </svg>
+                            <p>Submit text to view sentiment analysis, confidence scores, and Kinyarwanda translation.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if analyzed %}
+
+            <!-- ═══ KINYARWANDA TRANSLATION PANEL ═══ -->
+            <div class="panel translation-panel animate-in full-width" id="translation-panel">
+                <div class="panel-header">
+                    <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 8l6 6"></path>
+                        <path d="M4 14l6-6 2-3"></path>
+                        <path d="M2 5h12"></path>
+                        <path d="M7 2h1"></path>
+                        <path d="m22 22-5-10-5 10"></path>
+                        <path d="M14 18h6"></path>
+                    </svg>
+                    Kinyarwanda Translation
+                </div>
+                <div class="panel-body">
+                    <span class="translation-lang-badge">
+                        🇷🇼 Ikinyarwanda
+                    </span>
+                    <div class="translation-text">
+                        {{ translation_rw }}
                     </div>
+                </div>
+            </div>
 
-                    <div class="chart-title">Sentiment Trajectory (Sentence by Sentence)</div>
+            <!-- ═══ SENTIMENT TRAJECTORY CHART ═══ -->
+            <div class="panel animate-in full-width" id="chart-panel">
+                <div class="panel-header">
+                    <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    Sentiment Trajectory
+                </div>
+                <div class="panel-body">
                     <div class="chart-container">
                         <canvas id="sentimentChart"></canvas>
                     </div>
-                {% else %}
-                    <div class="empty-state">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                        <p>Submit text to view detailed sentiment trajectory and confidence metrics.</p>
-                    </div>
-                {% endif %}
+                </div>
             </div>
+
+            <!-- ═══ SENTENCE DETAIL TABLE ═══ -->
+            <div class="panel animate-in full-width" id="sentence-detail-panel">
+                <div class="panel-header">
+                    <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                        <line x1="9" y1="21" x2="9" y2="9"></line>
+                    </svg>
+                    Sentence-Level Breakdown
+                </div>
+                <div class="panel-body" style="padding: 0;">
+                    <table class="detail-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">#</th>
+                                <th>Sentence (English)</th>
+                                <th>Sentiment</th>
+                                <th style="width: 90px;">Confidence</th>
+                                <th>Translation (Kinyarwanda)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in sentence_details %}
+                            <tr>
+                                <td style="color: var(--text-muted); font-weight: 600;">{{ loop.index }}</td>
+                                <td>{{ item.text }}</td>
+                                <td>
+                                    <span class="badge badge-{{ item.sentiment|lower }}">
+                                        <span class="badge-dot"></span>
+                                        {{ item.sentiment }}
+                                    </span>
+                                </td>
+                                <td class="td-conf">{{ item.confidence }}%</td>
+                                <td class="td-translation">{{ item.translation }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% endif %}
         </div>
     </div>
 
@@ -319,18 +680,17 @@
     <script>
         const chartData = {{ chart_data | tojson }};
         const labels = Array.from({length: chartData.length}, (_, i) => `Sentence ${i + 1}`);
-        
+
         const ctx = document.getElementById('sentimentChart').getContext('2d');
-        
-        // Define color based on final sentiment or average
-        const positiveColor = '#28a745';
-        const negativeColor = '#d73a49';
-        const neutralColor = '#6a737d';
-        
+
+        const positiveColor = '#1a7f37';
+        const negativeColor = '#cf222e';
+        const neutralColor  = '#6e7781';
+
         // Create gradient fill
-        const gradient = ctx.createLinearGradient(0, 0, 0, 250);
-        gradient.addColorStop(0, 'rgba(3, 102, 214, 0.1)');
-        gradient.addColorStop(1, 'rgba(3, 102, 214, 0)');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+        gradient.addColorStop(0, 'rgba(9, 105, 218, 0.12)');
+        gradient.addColorStop(1, 'rgba(9, 105, 218, 0)');
 
         new Chart(ctx, {
             type: 'line',
@@ -339,8 +699,8 @@
                 datasets: [{
                     label: 'Sentiment Score',
                     data: chartData,
-                    borderColor: '#0366d6',
-                    borderWidth: 2,
+                    borderColor: '#0969da',
+                    borderWidth: 2.5,
                     pointBackgroundColor: chartData.map(val => {
                         if(val > 0.3) return positiveColor;
                         if(val < -0.3) return negativeColor;
@@ -348,11 +708,11 @@
                     }),
                     pointBorderColor: '#ffffff',
                     pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     fill: true,
                     backgroundColor: gradient,
-                    tension: 0.3
+                    tension: 0.35
                 }]
             },
             options: {
@@ -361,15 +721,17 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#24292e',
+                        backgroundColor: '#1f2328',
                         titleColor: '#ffffff',
-                        bodyColor: '#e1e4e8',
-                        padding: 10,
+                        bodyColor: '#d0d7de',
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: false,
                         callbacks: {
                             label: function(context) {
                                 let val = context.parsed.y;
                                 let label = val > 0.3 ? 'Positive' : (val < -0.3 ? 'Negative' : 'Neutral');
-                                return `Score: ${val.toFixed(2)} (${label})`;
+                                return `Score: ${val.toFixed(2)} — ${label}`;
                             }
                         }
                     }
@@ -379,12 +741,12 @@
                         min: -1.2,
                         max: 1.2,
                         grid: {
-                            color: '#f0f2f4',
+                            color: '#eaeef2',
                             drawBorder: false
                         },
                         ticks: {
-                            color: '#586069',
-                            font: { size: 11 },
+                            color: '#656d76',
+                            font: { size: 11, weight: '500' },
                             callback: function(value) {
                                 if(value === 1) return 'Positive';
                                 if(value === 0) return 'Neutral';
@@ -399,7 +761,7 @@
                             drawBorder: false
                         },
                         ticks: {
-                            color: '#586069',
+                            color: '#656d76',
                             font: { size: 11 }
                         }
                     }

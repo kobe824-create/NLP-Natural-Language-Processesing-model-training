@@ -60,7 +60,7 @@ SLANG_MAP = {
     r"\bglow up\b": "improve greatly",
     r"\bflex\b": "show off",
     r"\bbussin\b": "very good",
-    r"\bsuss\b": "suspicious",
+    r"\bsuss\b": "suspicious",        
     r"\bamong us\b": "suspicious",
     r"\bclout\b": "fame",
     r"\bstan\b": "obsessive fan",
