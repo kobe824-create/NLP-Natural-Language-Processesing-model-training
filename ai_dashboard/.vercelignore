@@ -1,0 +1,9 @@
+venv/
+.sixth/
+templates/
+__pycache__/
+*.pyc
+test_app.py
+train_nlp_model.py
+render.yaml
+.gitignore
